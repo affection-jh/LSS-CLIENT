@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "864280172805",
+    "project_id": "lss-rally",
+    "storage_bucket": "lss-rally.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:864280172805:android:0ddf2ed98394af4e0c7f6c",
+        "android_client_info": {
+          "package_name": "com.lss.esc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "864280172805-ln089hc9dljnmdt7pkpfeage1kce1ctm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lss.esc",
+            "certificate_hash": "2b8ebdc4d61ee08cc32c0ad2ecbd699da65840c2"
+          }
+        },
+        {
+          "client_id": "864280172805-vdu4nk09mcjvv9fuca906c6dvl5q2s7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4fZnW8HwV8k7yE0Eglqxl3Fx6A-_n1B8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "864280172805-vdu4nk09mcjvv9fuca906c6dvl5q2s7l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "864280172805-uvoeq38iun9b5grlrd2rs4cor1lqa5h8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.lss.esc"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
