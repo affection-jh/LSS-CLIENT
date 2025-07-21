@@ -122,7 +122,7 @@ class _OrderRegisterViewState extends State<OrderRegisterView> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            '장군님이 순서를 기억할거에요.',
+                            '장군님이 순서를 기억할거에요. ${currentSession.players.length}/${gameManager.totalJoinCount}',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w400,

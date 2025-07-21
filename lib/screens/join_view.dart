@@ -125,6 +125,7 @@ class _GameEnteringViewState extends State<GameJoiningView>
                     selectedFillColor: Colors.transparent,
                     inactiveFillColor: Colors.transparent,
                   ),
+                  keyboardType: TextInputType.number,
                 ),
               ),
             ),

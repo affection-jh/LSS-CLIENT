@@ -156,7 +156,10 @@ class _OnboardingViewState extends State<OnboardingView> {
               if (player?.name.isEmpty ?? true) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileSettingView()),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProfileSettingView(callFromWhere: 'onboarding'),
+                  ),
                 );
               } else {
                 Navigator.pushReplacement(
@@ -214,9 +217,13 @@ class _OnboardingViewState extends State<OnboardingView> {
               await UserService().initializeUser(user.uid);
               Player? player = UserService().getUser();
               if (player?.name.isEmpty ?? true) {
+                print('프로필 설정 필요');
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileSettingView()),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProfileSettingView(callFromWhere: 'onboarding'),
+                  ),
                 );
               } else {
                 Navigator.pushReplacement(

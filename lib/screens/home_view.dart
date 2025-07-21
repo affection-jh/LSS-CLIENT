@@ -1,5 +1,6 @@
 import 'package:esc/screens/join_view.dart';
 import 'package:esc/screens/making_view.dart';
+import 'package:esc/screens/onboarding_view.dart';
 import 'package:esc/screens/setting_view.dart';
 import 'package:esc/service/manage_service.dart';
 import 'package:esc/service/user_service.dart';
@@ -15,6 +16,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  @override
   initState() {
     super.initState();
     context.read<GameManager>().disconnect();
@@ -24,6 +26,13 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+
+    if (UserService().getUser()?.name.isEmpty ?? true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => OnboardingView()),
+      );
+    }
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -48,7 +57,7 @@ class _HomeViewState extends State<HomeView> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 10,
+                      vertical: 13,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -61,9 +70,13 @@ class _HomeViewState extends State<HomeView> {
                               MaterialPageRoute(
                                 builder: (context) => SettingView(),
                               ),
-                            );
+                            ).then((value) {
+                              if (value != null) {
+                                setState(() {});
+                              }
+                            });
                           },
-                          icon: Icon(Icons.menu, size: 20),
+                          icon: Icon(Icons.menu, size: 25),
                         ),
                       ],
                     ),
@@ -221,6 +234,7 @@ class _HomeViewState extends State<HomeView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        SizedBox(height: 20),
                         Text(
                           "게임 참여하기",
                           style: TextStyle(
@@ -239,6 +253,11 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ],
                     ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: Image.asset("assets/turtle_ship.png"),
                   ),
                 ],
               ),

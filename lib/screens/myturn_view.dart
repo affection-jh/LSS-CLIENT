@@ -35,12 +35,7 @@ class _MyTurnViewState extends State<MyTurnView> {
 
     return WillPopScope(
       onWillPop: () async {
-        if (!mounted) return false;
-        bool? result = await AppUtil.ShowExitDiaglog(
-          context,
-          currentSession!.presidentId == UserService().getUser()?.userId,
-        );
-        return result ?? false;
+        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,

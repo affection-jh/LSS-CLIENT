@@ -1,4 +1,5 @@
 import 'package:esc/data/player.dart';
+import 'package:esc/service/user_service.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:esc/data/session.dart';
@@ -17,6 +18,7 @@ class GameManager extends ChangeNotifier {
   Session? currentSession;
   String? currentUserId;
   bool? isGamePlaying;
+  int? totalJoinCount;
 
   // 에러 상태
   String? errorCode;
@@ -146,6 +148,7 @@ class GameManager extends ChangeNotifier {
       'entryCode': entryCode,
       'userId': player.userId,
       'name': player.name,
+      'profileImageUrl': player.profileImageUrl,
     });
   }
 
@@ -201,6 +204,7 @@ class GameManager extends ChangeNotifier {
       sendRequest('register-order', {
         'userId': currentUserId,
         'sessionId': currentSession!.sessionId,
+        'profileImageUrl': UserService().getUser()?.profileImageUrl,
       });
     }
   }

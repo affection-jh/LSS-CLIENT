@@ -77,6 +77,8 @@ class _PendingViewState extends State<PendingView> {
           );
         }
 
+        gameManager.totalJoinCount = gameManager.currentSession!.players.length;
+
         final isPresident =
             gameManager.currentSession!.presidentId ==
             UserService().getUser()?.userId;

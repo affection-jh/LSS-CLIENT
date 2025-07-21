@@ -41,24 +41,41 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '이순신랠리',
-      home: FutureBuilder(
+      home: FutureBuilder<Player?>(
         future: initializeUser(),
         builder: (context, snapshot) {
+          // 로딩 중
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
               backgroundColor: Colors.white,
-              body: Center(child: CircularProgressIndicator()),
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: const Color.fromARGB(255, 255, 143, 143),
+                  strokeWidth: 2,
+                ),
+              ),
             );
           }
-          if (snapshot.data == null) {
+
+          // 에러 발생
+          if (snapshot.hasError) {
             return OnboardingView();
           }
 
-          if (snapshot.data?.name.isEmpty ?? true) {
-            return ProfileSettingView();
-          } else {
-            return HomeView();
+          final user = snapshot.data;
+
+          // 로그인되지 않은 상태 (user == null)
+          if (user == null) {
+            return OnboardingView();
           }
+
+          // 로그인은 되었지만 프로필 설정이 안된 상태
+          if (user.name.isEmpty) {
+            return ProfileSettingView(callFromWhere: 'main');
+          }
+
+          // 모든 설정 완료 상태
+          return HomeView();
         },
       ),
     );

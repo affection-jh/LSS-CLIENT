@@ -1,8 +1,11 @@
 import 'package:esc/screens/onboarding_view.dart';
+import 'package:esc/screens/profile_setting_view.dart';
 import 'package:esc/service/auth_service.dart';
 import 'package:esc/service/user_service.dart';
+import 'package:esc/utill/app_utility.dart';
 import 'package:esc/utill/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SettingView extends StatefulWidget {
   const SettingView({super.key});
@@ -13,18 +16,19 @@ class SettingView extends StatefulWidget {
 
 class _SettingViewState extends State<SettingView> {
   final TextEditingController _nicknameController = TextEditingController();
-  bool _isEditingNickname = false;
-  bool _isEditingProfileImage = false;
+  bool _isLoadingProfileImage = false; // 프로필 이미지 로딩 상태
+  bool _hasProfileChanged = false; // 프로필 변경 여부 추적
+  String _existingProfileImageUrl = '';
 
   @override
   void initState() {
     super.initState();
     _nicknameController.text = UserService().getUser()?.name ?? '사용자님';
+    _existingProfileImageUrl = UserService().profileImageUrl ?? '';
   }
 
   @override
   void dispose() {
-    _nicknameController.dispose();
     super.dispose();
   }
 
@@ -37,7 +41,7 @@ class _SettingViewState extends State<SettingView> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, _hasProfileChanged),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
         ),
       ),
@@ -65,11 +69,50 @@ class _SettingViewState extends State<SettingView> {
                 children: [
                   // 프로필 이미지
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isEditingProfileImage = true;
-                      });
-                      _showImagePickerDialog();
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProfileSettingView(callFromWhere: 'setting'),
+                        ),
+                      );
+
+                      // 이미지가 변경되었으면 로딩 띄우고 새로고침
+                      if (result == true) {
+                        // 닉네임은 즉시 업데이트 (ProfileSetting에서 이미 업데이트됨)
+                        _nicknameController.text =
+                            UserService().getUser()?.name ?? '사용자님';
+
+                        setState(() {
+                          _isLoadingProfileImage = true;
+                        });
+
+                        // UserService는 이미 업데이트되었으므로 바로 이미지 캐싱
+                        if (UserService().profileImageUrl != null &&
+                            UserService().profileImageUrl!.isNotEmpty &&
+                            UserService().profileImageUrl !=
+                                _existingProfileImageUrl) {
+                          try {
+                            // CachedNetworkImage가 새 Firebase URL을 완전히 로드할 수 있을 때까지 대기
+                            await precacheImage(
+                              CachedNetworkImageProvider(
+                                UserService().profileImageUrl!,
+                              ),
+                              context,
+                            );
+                            print(
+                              '이미지 캐싱 완료: ${UserService().profileImageUrl}',
+                            );
+                          } catch (e) {
+                            print('이미지 캐시 실패: $e');
+                          }
+                        }
+
+                        setState(() {
+                          _isLoadingProfileImage = false;
+                        });
+                      }
                     },
                     child: Stack(
                       children: [
@@ -78,13 +121,51 @@ class _SettingViewState extends State<SettingView> {
                           height: 120,
                           decoration: BoxDecoration(shape: BoxShape.circle),
                           child: ClipOval(
-                            child:
-                                UserService().profileImageUrl != null &&
-                                    UserService().profileImageUrl!.isNotEmpty
-                                ? Image.network(
-                                    UserService().profileImageUrl!,
+                            child: _isLoadingProfileImage
+                                ? Container(
+                                    color: const Color.fromARGB(
+                                      255,
+                                      216,
+                                      216,
+                                      216,
+                                    ),
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: const Color.fromARGB(
+                                          255,
+                                          255,
+                                          255,
+                                          255,
+                                        ),
+                                        strokeWidth: 1,
+                                      ),
+                                    ),
+                                  )
+                                : UserService().profileImageUrl != null &&
+                                      UserService().profileImageUrl!.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: UserService().profileImageUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
+                                    placeholder: (context, url) => Container(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            255,
+                                            255,
+                                            255,
+                                          ),
+                                          strokeWidth: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (context, error, stackTrace) {
                                       return Container(
                                         color: const Color.fromARGB(
                                           255,
@@ -115,24 +196,6 @@ class _SettingViewState extends State<SettingView> {
                                   ),
                           ),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 255, 150, 150),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -142,93 +205,39 @@ class _SettingViewState extends State<SettingView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: 16),
-                      if (_isEditingNickname) ...[
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color.fromARGB(255, 255, 150, 150),
-                                width: 1.5,
-                              ),
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfileSettingView(callFromWhere: 'setting'),
                             ),
-                            child: TextField(
-                              controller: _nicknameController,
-                              textAlign: TextAlign.center,
+                          );
+
+                          // 이미지가 변경되었으면 닉네임도 새로고침
+                          if (result == true) {
+                            _hasProfileChanged = true; // 변경사항 표시
+                            // 닉네임 즉시 업데이트
+                            _nicknameController.text =
+                                UserService().getUser()?.name ?? '사용자님';
+                            setState(() {});
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _nicknameController.text,
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
-                              decoration: InputDecoration(
-                                hintText: '닉네임을 입력하세요',
-                                hintStyle: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 16,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        SizedBox(width: 8),
-                        IconButton(
-                          onPressed: () async {
-                            if (_nicknameController.text.trim().isNotEmpty) {
-                              bool success = await UserService().updateNickname(
-                                _nicknameController.text.trim(),
-                              );
-                              if (success) {
-                                setState(() {
-                                  _isEditingNickname = false;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('닉네임이 변경되었습니다.'),
-                                    backgroundColor: Colors.black,
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('닉네임 변경에 실패했습니다.'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          icon: Icon(Icons.check, color: Colors.black87),
-                        ),
-                      ] else ...[
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isEditingNickname = true;
-                            });
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _nicknameController.text,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.edit, color: Colors.grey, size: 16),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ],
                   ),
                 ],
@@ -365,56 +374,6 @@ class _SettingViewState extends State<SettingView> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showImagePickerDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            '프로필 이미지 변경',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '현재는 기본 이미지만 사용 가능합니다.',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '추후 업데이트에서 이미지 업로드 기능이 추가될 예정입니다.',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                setState(() {
-                  _isEditingProfileImage = false;
-                });
-              },
-              child: Text(
-                '확인',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 255, 150, 150),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -726,7 +685,9 @@ class _SettingViewState extends State<SettingView> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           content: Text(
-            '정말로 $title 하시겠습니까?',
+            title == '로그아웃'
+                ? '정말로 로그아웃할까요?'
+                : '정말로 탈퇴할까요?\n\n탈퇴 시 모든 데이터가 영구 삭제되며 복구할 수 없어요.',
             style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           ),
           actions: [
@@ -742,32 +703,9 @@ class _SettingViewState extends State<SettingView> {
                 Navigator.pop(context);
 
                 if (title == '로그아웃') {
-                  await AuthService.signOut();
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => OnboardingView()),
-                    (route) => false,
-                  );
+                  await _handleLogout();
                 } else {
-                  // 회원 탈퇴 처리
-                  bool success = await AuthService.deleteAccount();
-                  if (success) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => OnboardingView()),
-                      (route) => false,
-                    );
-                  } else {
-                    // 탈퇴 실패 시 에러 메시지 표시
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('회원 탈퇴에 실패했습니다. 다시 시도해주세요.'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  }
+                  await _handleAccountDeletion();
                 }
               },
               child: Text(
@@ -783,5 +721,164 @@ class _SettingViewState extends State<SettingView> {
         );
       },
     );
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await AuthService.signOut();
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => OnboardingView()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      print('로그아웃 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그아웃에 실패했습니다. 다시 시도해주세요.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAccountDeletion() async {
+    // 2단계 확인 다이얼로그
+    bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            '탈퇴시 재인증이 필요해요.',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '삭제되는 데이터:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '• 프로필 정보 (닉네임, 이미지)\n• 게임 참여 기록\n• 모든 개인 데이터',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                '취소',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                '확인',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    // 로딩 다이얼로그 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 20),
+              CircularProgressIndicator(
+                color: const Color.fromARGB(255, 255, 143, 143),
+                strokeWidth: 2,
+              ),
+              SizedBox(height: 16),
+              Text(
+                '재인증 및 계정 삭제 중...',
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // 원자적 탈퇴 처리
+      bool success = await AuthService.deleteAccount();
+
+      // 로딩 다이얼로그 닫기
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      if (success) {
+        // 탈퇴 성공 - 온보딩으로 이동
+        if (mounted) {
+          // 약간의 딜레이 후 온보딩으로 이동
+          await Future.delayed(Duration(milliseconds: 500));
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => OnboardingView()),
+            (route) => false,
+          );
+        }
+      } else {
+        // 탈퇴 실패
+        if (mounted) {
+          AppUtil.showErrorSnackbar(context, message: '계정 탈퇴에 실패했어요.');
+        }
+      }
+    } catch (e) {
+      print('계정 탈퇴 처리 중 예외: $e');
+
+      // 로딩 다이얼로그 닫기
+      if (mounted) {
+        Navigator.pop(context);
+
+        AppUtil.showErrorSnackbar(context, message: '계정 탈퇴 중 오류가 발생했어요.');
+      }
+    }
   }
 }

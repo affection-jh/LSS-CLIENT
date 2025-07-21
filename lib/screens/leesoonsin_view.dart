@@ -111,6 +111,7 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                     left: 24,
                     right: 24,
                     bottom: 10,
+                    top: 1,
                   ),
                   child: Material(
                     color: ColorPalette.secondaryColor,
@@ -189,8 +190,8 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
         final coinSize = imageSize * 0.32; // 이미지 크기의 16%
 
         // 동전 위치를 이미지 크기에 비례하여 계산
-        final coinTop = imageSize * 0.001; // 이미지 높이의 16.8%
-        final coinRight = imageSize * 0.21; // 이미지 너비의 25.2%
+        final coinTop = imageSize * 0.006; // 이미지 높이의 16.8%
+        final coinRight = imageSize * 0.215; // 이미지 너비의 25.2%
 
         return Stack(
           children: [
@@ -230,7 +231,7 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                             height: coinSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color.fromARGB(255, 255, 180, 180),
+                              color: const Color.fromARGB(255, 216, 216, 216),
                             ),
                             child: Center(
                               child: Icon(

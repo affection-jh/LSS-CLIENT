@@ -10,6 +10,7 @@ import 'package:esc/utill/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:esc/utill/purse_coin.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class WaitingView extends StatefulWidget {
   const WaitingView({super.key});
@@ -53,8 +54,7 @@ class _WaitingViewState extends State<WaitingView> {
 
         return WillPopScope(
           onWillPop: () async {
-            bool? result = await AppUtil.ShowExitDiaglog(context, isPresident);
-            return result ?? false;
+            return false;
           },
           child: Scaffold(
             backgroundColor: Colors.white,
@@ -218,11 +218,23 @@ class _WaitingViewState extends State<WaitingView> {
       return Container();
     }
 
+    final myIndex =
+        session.players.indexWhere(
+          (player) => player.userId == UserService().getUser()?.userId,
+        ) +
+        1;
+    final currentPlayerIndex = session.currentPlayerIndex + 1;
+    final isClockWise = session.isClockWise;
+
+    final memberCountBeforeMe = isClockWise
+        ? (currentPlayerIndex - myIndex).abs()
+        : (myIndex - currentPlayerIndex).abs();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "내 차례까지 ${session.players.length - session.currentPlayerIndex - 1}명!",
+          "내 차례까지 $memberCountBeforeMe명!",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -283,7 +295,7 @@ class _WaitingViewState extends State<WaitingView> {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isMe ? const Color.fromARGB(255, 255, 249, 251) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -302,31 +314,47 @@ class _WaitingViewState extends State<WaitingView> {
             decoration: BoxDecoration(shape: BoxShape.circle),
             child: Center(
               child: player.profileImageUrl != null
-                  ? Image.network(
-                      player.profileImageUrl!,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: player.profileImageUrl!,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
                           width: 50,
                           height: 50,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: ColorPalette.primaryColor,
+                            color: ColorPalette.primaryColor.withOpacity(0.3),
                           ),
                           child: Center(
-                            child: Text(
-                              player.name.substring(0, 1).toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            child: CircularProgressIndicator(
+                              color: ColorPalette.primaryColor,
+                              strokeWidth: 2,
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        errorWidget: (context, url, error) {
+                          return Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: ColorPalette.primaryColor,
+                            ),
+                            child: Center(
+                              child: Text(
+                                player.name.substring(0, 1).toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     )
                   : Container(
                       width: 50,
@@ -359,7 +387,7 @@ class _WaitingViewState extends State<WaitingView> {
                     Text(
                       player.name,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF495057),
                       ),
@@ -404,11 +432,6 @@ class _WaitingViewState extends State<WaitingView> {
                         ),
                       ),
                   ],
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "게임 참여자",
-                  style: TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
                 ),
               ],
             ),

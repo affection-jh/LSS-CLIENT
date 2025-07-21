@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 카메라 권한 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 외부 저장소 읽기 권한 (갤러리 접근용) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- 외부 저장소 쓰기 권한 (이미지 저장용) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 인터넷 권한 (Firebase Storage 업로드용) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application
         android:label="esc"
         android:name="${applicationName}"

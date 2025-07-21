@@ -3,6 +3,7 @@ import 'package:esc/data/player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthService {
   static Future<User?> signInWithGoogle() async {
@@ -96,8 +97,30 @@ class AuthService {
   }
 
   static Future<String?> isSignedIn() async {
-    final user = FirebaseAuth.instance.currentUser;
-    return user?.uid;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        return null;
+      }
+
+      // 토큰 유효성 검증 (토큰 새로고침 시도)
+      try {
+        await user.getIdToken(true); // forceRefresh: true
+        return user.uid;
+      } catch (tokenError) {
+        // 토큰이 무효하면 로그아웃 처리
+        await FirebaseAuth.instance.signOut();
+        return null;
+      }
+    } catch (e) {
+      // 에러 발생 시 안전하게 로그아웃 처리
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (signOutError) {}
+
+      return null;
+    }
   }
 
   static Future<void> signOut() async {
@@ -117,11 +140,60 @@ class AuthService {
 
       final userId = user.uid;
 
-      // 1. Firestore에서 사용자 데이터 삭제
+      // 0. 사용자 재인증 (최근 로그인 확인)
+      try {
+        // Google 로그인 사용자인 경우 재인증
+        if (user.providerData.any((info) => info.providerId == 'google.com')) {
+          final GoogleSignIn googleSignIn = GoogleSignIn();
+          final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+          if (googleUser != null) {
+            final GoogleSignInAuthentication googleAuth =
+                await googleUser.authentication;
+            final credential = GoogleAuthProvider.credential(
+              accessToken: googleAuth.accessToken,
+              idToken: googleAuth.idToken,
+            );
+            await user.reauthenticateWithCredential(credential);
+          } else {
+            print("Google 재인증 실패");
+            return false;
+          }
+        }
+        print("사용자 재인증 완료");
+      } catch (e) {
+        print("재인증 실패: $e");
+        return false;
+      }
+
+      // 1. Firebase Storage에서 프로필 이미지 삭제
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          final profileImageUrl = userData?['profileImageUrl'] as String?;
+
+          if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+            if (profileImageUrl.startsWith(
+              'https://firebasestorage.googleapis.com/',
+            )) {
+              final ref = FirebaseStorage.instance.refFromURL(profileImageUrl);
+              await ref.delete();
+              print("프로필 이미지 삭제 완료: $profileImageUrl");
+            }
+          }
+        }
+      } catch (e) {
+        print("프로필 이미지 삭제 실패 (계속 진행): $e");
+      }
+
+      // 2. Firestore에서 사용자 데이터 삭제
       await FirebaseFirestore.instance.collection('users').doc(userId).delete();
       print("사용자 데이터 삭제 완료");
 
-      // 2. 사용자가 참여 중인 세션에서 제거
+      // 3. 사용자가 참여 중인 세션에서 제거
       final sessionsRef = FirebaseFirestore.instance.collection('sessions');
       final sessionsSnapshot = await sessionsRef
           .where('players', arrayContains: userId)
@@ -150,7 +222,7 @@ class AuthService {
       }
       print("세션 데이터 정리 완료");
 
-      // 3. Firebase Auth에서 계정 삭제
+      // 4. Firebase Auth에서 계정 삭제
       await user.delete();
       print("Firebase Auth 계정 삭제 완료");
 
