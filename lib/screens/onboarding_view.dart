@@ -1,4 +1,6 @@
+import 'package:esc/data/player.dart';
 import 'package:esc/screens/home_view.dart';
+import 'package:esc/screens/profile_setting_view.dart';
 import 'package:esc/service/auth_service.dart';
 import 'package:esc/service/user_service.dart';
 import 'package:esc/utill/bottom_sheet.dart';
@@ -150,10 +152,18 @@ class _OnboardingViewState extends State<OnboardingView> {
             User? user = await AuthService.signInwithApple();
             if (user != null) {
               await UserService().initializeUser(user.uid);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeView()),
-              );
+              Player? player = UserService().getUser();
+              if (player?.name.isEmpty ?? true) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileSettingView()),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeView()),
+                );
+              }
               _isLoading = false;
             } else {
               setState(() {
@@ -202,11 +212,18 @@ class _OnboardingViewState extends State<OnboardingView> {
             User? user = await AuthService.signInWithGoogle();
             if (user != null) {
               await UserService().initializeUser(user.uid);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeView()),
-              );
-
+              Player? player = UserService().getUser();
+              if (player?.name.isEmpty ?? true) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileSettingView()),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeView()),
+                );
+              }
               _isLoading = false;
             } else {
               setState(() {

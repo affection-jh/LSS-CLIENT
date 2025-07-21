@@ -35,11 +35,10 @@ class AuthService {
         if (!docSnapshot.exists) {
           Player player = Player(
             userId: userCredential.user!.uid,
-            name: userCredential.user!.displayName ?? "알 수 없음",
-            profileImageUrl: userCredential.user?.photoURL ?? '',
+            name: '',
+            profileImageUrl: null,
           );
           await userDoc.set(player.toJson());
-          print("신규 가입 성공");
         }
       }
 
@@ -80,22 +79,12 @@ class AuthService {
         final docSnapshot = await userDoc.get();
 
         if (!docSnapshot.exists) {
-          String displayName = '';
-          if (credential.givenName != null && credential.familyName != null) {
-            displayName = '${credential.givenName} ${credential.familyName}';
-          } else if (credential.givenName != null) {
-            displayName = credential.givenName!;
-          } else if (credential.familyName != null) {
-            displayName = credential.familyName!;
-          }
-
           Player player = Player(
             userId: userCredential.user!.uid,
-            profileImageUrl: '',
-            name: displayName, // Apple은 기본적으로 프로필 이미지를 제공하지 않음
+            profileImageUrl: null,
+            name: '',
           );
           await userDoc.set(player.toJson());
-          print("Apple 신규 가입 성공");
         }
       }
 

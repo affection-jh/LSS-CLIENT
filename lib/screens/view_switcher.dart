@@ -4,7 +4,7 @@ import 'package:esc/screens/myturn_view.dart';
 import 'package:esc/screens/order_register_view.dart';
 import 'package:esc/screens/pending_view.dart';
 import 'package:esc/screens/waiting_view.dart';
-import 'package:esc/service/error_handler.dart';
+import 'package:esc/service/error_service.dart';
 import 'package:esc/utill/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:esc/service/manage_service.dart';

@@ -1,5 +1,5 @@
 import 'package:esc/data/player.dart';
-import 'package:esc/service/error_handler.dart';
+import 'package:esc/service/error_service.dart';
 import 'package:esc/service/user_service.dart';
 import 'package:esc/service/manage_service.dart';
 import 'package:esc/screens/view_switcher.dart';
