@@ -17,7 +17,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => GameManager())],
-      child: MyApp(),
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()),
     ),
   );
 }
@@ -40,6 +40,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: '이순신랠리',
       home: FutureBuilder<Player?>(
         future: initializeUser(),

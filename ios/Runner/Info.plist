@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -14,20 +16,53 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>esc</string>
+	<key>CFBundleIcons</key>
+	<dict>
+	<key>CFBundlePrimaryIcon</key>
+	<dict>
+		<key>CFBundleIconFiles</key>
+		<array>
+			<string>AppIcon</string>
+		</array>
+		<key>UIPrerenderedIcon</key>
+		<false/>
+	</dict>
+	</dict>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.864280172805-uvoeq38iun9b5grlrd2rs4cor1lqa5h8</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>GIDClientID</key>
+	<string>864280172805-uvoeq38iun9b5grlrd2rs4cor1lqa5h8.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>카메라를 사용하려면 권한이 필요해요.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진을 선택하려면 권한이 필요해요.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIRequiresFullScreen</key>
+	<false/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -36,36 +71,5 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-
-
-	<!-- 사진 선택 권한 -->
-	 <key>NSPhotoLibraryUsageDescription</key>
-     <string>사진을 선택하려면 권한이 필요해요.</string>
-     <key>NSCameraUsageDescription</key>
-     <string>카메라를 사용하려면 권한이 필요해요.</string>
-	<!--여기까지 -->
-
-    
-	<!--구글 로그인 설정-->
-	<key>GIDClientID</key>
-	<string>864280172805-uvoeq38iun9b5grlrd2rs4cor1lqa5h8.apps.googleusercontent.com</string>
-
-	<key>CFBundleURLTypes</key>
-	<array>
-	    <dict>
-	        <key>CFBundleTypeRole</key>
-	        <string>Editor</string>
-	        <key>CFBundleURLSchemes</key>
-	        <array>
-	        	<string>com.googleusercontent.apps.864280172805-uvoeq38iun9b5grlrd2rs4cor1lqa5h8</string>
-	        </array>
-	    </dict>
-	</array>
-		
-
 </dict>
 </plist>

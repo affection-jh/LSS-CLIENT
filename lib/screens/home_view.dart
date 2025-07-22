@@ -137,7 +137,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildingButton(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -200,7 +200,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _joiningButton(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Material(
         color: Colors.transparent,
         child: InkWell(

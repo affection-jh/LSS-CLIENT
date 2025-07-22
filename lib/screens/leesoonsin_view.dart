@@ -58,45 +58,6 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                             maxLines: 1,
                           ),
                         ),
-
-                        if (gameManager.currentSession!.isPresident && isTablet)
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                if (gameManager.currentSession!.isPresident) {
-                                  gameManager.continueLeeSoonSin();
-
-                                  Future.delayed(Duration(seconds: 5), () {
-                                    if (mounted) {
-                                      AppUtil.showErrorSnackbar(
-                                        context,
-                                        message: "네트워크 연결을 확인해주세요.",
-                                      );
-                                    }
-                                  });
-                                }
-                              },
-                              child: Ink(
-                                width: 250,
-                                height: 55,
-                                decoration: BoxDecoration(
-                                  color: ColorPalette.secondaryColor,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "계속하기",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -119,8 +80,7 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                         },
                       ),
 
-                      if (gameManager.currentSession!.isPresident &&
-                          MediaQuery.of(context).size.width <= 600)
+                      if (gameManager.currentSession!.isPresident)
                         Padding(
                           padding: const EdgeInsets.only(
                             left: 24,
@@ -166,8 +126,7 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                           ),
                         ),
 
-                      if (!gameManager.currentSession!.isPresident &&
-                          MediaQuery.of(context).size.width <= 600)
+                      if (!gameManager.currentSession!.isPresident)
                         Padding(
                           padding: const EdgeInsets.only(
                             left: 24,
