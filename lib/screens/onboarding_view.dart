@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:esc/data/player.dart';
 import 'package:esc/screens/home_view.dart';
 import 'package:esc/screens/profile_setting_view.dart';
@@ -130,7 +132,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       children: [
         _buildGoogleLoginButton(),
         const SizedBox(height: 10),
-        _buildAppleLoginButton(),
+        if (Platform.isIOS) _buildAppleLoginButton(),
       ],
     );
   }
@@ -157,8 +159,9 @@ class _OnboardingViewState extends State<OnboardingView> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ProfileSettingView(callFromWhere: 'onboarding'),
+                    builder:
+                        (context) =>
+                            ProfileSettingView(callFromWhere: 'onboarding'),
                   ),
                 );
               } else {
@@ -221,8 +224,9 @@ class _OnboardingViewState extends State<OnboardingView> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ProfileSettingView(callFromWhere: 'onboarding'),
+                    builder:
+                        (context) =>
+                            ProfileSettingView(callFromWhere: 'onboarding'),
                   ),
                 );
               } else {

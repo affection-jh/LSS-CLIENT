@@ -53,10 +53,10 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
     }
     _nameController.addListener(_onInputChanged);
 
-    // 화면이 완전히 빌드된 후 텍스트 필드에 포커스 주기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _nameFocusNode.requestFocus();
-    });
+    // 자동 포커스 기능 제거
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _nameFocusNode.requestFocus();
+    // });
   }
 
   void _onInputChanged() {
@@ -131,12 +131,17 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
               ListTile(
                 leading: Icon(Icons.person_outline, color: Colors.blue),
                 title: Text('기본 이미지 사용'),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
+                  // 파이어베이스에서 기존 이미지 삭제
+                  if (_profileImageUrl != null) {
+                    await UserService().deleteProfileImage(); // 이 함수는 직접 구현 필요
+                  }
                   setState(() {
                     _selectedImage = null;
                     _profileImageUrl = null;
                     _isCameraMode = false;
+                    _hasChanges = true; // 변경사항 있음
                   });
                 },
               ),
@@ -275,9 +280,10 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: isTablet ? 600 : double.infinity,
-                  maxHeight: isTablet
-                      ? MediaQuery.of(context).size.height
-                      : double.infinity, // 태블릿에서 세로 크기 조정
+                  maxHeight:
+                      isTablet
+                          ? MediaQuery.of(context).size.height
+                          : double.infinity, // 태블릿에서 세로 크기 조정
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -294,12 +300,12 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                           AppUtil.getTopPadding(context) == 80
                               ? SizedBox(height: 10)
                               : Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    '프로필을 설정해볼까요?',
-                                    style: TextStyle(fontSize: 24),
-                                  ),
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  '프로필을 설정해볼까요?',
+                                  style: TextStyle(fontSize: 24),
                                 ),
+                              ),
                           TextField(
                             maxLength: 10,
                             controller: _nameController,
@@ -316,14 +322,15 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: _showNicknameError
-                                      ? Colors.red
-                                      : const Color.fromARGB(
-                                          255,
-                                          216,
-                                          216,
-                                          216,
-                                        ),
+                                  color:
+                                      _showNicknameError
+                                          ? Colors.red
+                                          : const Color.fromARGB(
+                                            255,
+                                            216,
+                                            216,
+                                            216,
+                                          ),
                                   width: 1,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -331,9 +338,10 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide(
-                                  color: _showNicknameError
-                                      ? Colors.red
-                                      : Colors.blue,
+                                  color:
+                                      _showNicknameError
+                                          ? Colors.red
+                                          : Colors.blue,
                                   width: 1,
                                 ),
                               ),
@@ -358,9 +366,8 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                               hintStyle: TextStyle(
                                 color: const Color.fromARGB(255, 48, 48, 48),
                               ),
-                              errorText: _showNicknameError
-                                  ? '닉네임이 필요해요'
-                                  : null,
+                              errorText:
+                                  _showNicknameError ? '닉네임이 필요해요' : null,
                               errorStyle: TextStyle(
                                 color: Colors.red,
                                 fontSize: 12,
@@ -383,16 +390,17 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
             ),
           ),
         ),
-        if (_isTakingPicture)
-          Container(
-            color: Colors.black.withOpacity(0.2),
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Colors.blue,
-                strokeWidth: 4,
-              ),
-            ),
-          ),
+        // 사진 찍는 순간에는 로딩 오버레이를 띄우지 않음
+        // if (_isTakingPicture)
+        //   Container(
+        //     color: Colors.black.withOpacity(0.2),
+        //     child: Center(
+        //       child: CircularProgressIndicator(
+        //         color: Colors.blue,
+        //         strokeWidth: 4,
+        //       ),
+        //     ),
+        //   ),
         if (_showBlackOverlay) Container(color: Colors.black),
       ],
     );
@@ -403,15 +411,17 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
     final isTablet = screenWidth > 600;
     final buttonHeight = isTablet ? 55.0 : 60.0; // 태블릿에서 버튼 높이 조정
 
-    // 버튼 활성화 조건: 닉네임이 비어있지 않고, (닉네임이 바뀌었거나 이미지를 새로 선택한 경우)
+    // 버튼 활성화 조건: 닉네임이 비어있지 않고, 닉네임 또는 이미지가 바뀐 경우
     final bool isNicknameNotEmpty = _nameController.text.trim().isNotEmpty;
     final bool isNicknameChanged =
         _nameController.text.trim() != (_originalNickname ?? '');
-    final bool isImageChanged = _selectedImage != null;
+    final bool isImageChanged =
+        (_selectedImage != null) ||
+        (_profileImageUrl != _originalProfileImageUrl);
     final bool canSubmit =
         isNicknameNotEmpty &&
         (isNicknameChanged || isImageChanged) &&
-        !_isUploading; // 텍스트 필드 + 변경사항 + 업로드 중이 아님
+        !_isUploading;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -428,33 +438,35 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
               width: double.infinity,
               height: buttonHeight,
               decoration: BoxDecoration(
-                color: canSubmit
-                    ? Colors.blue
-                    : const Color.fromARGB(255, 216, 216, 216),
+                color:
+                    canSubmit
+                        ? Colors.blue
+                        : const Color.fromARGB(255, 216, 216, 216),
               ),
               child: Center(
-                child: _isUploading
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                child:
+                    _isUploading
+                        ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             ),
+                          ],
+                        )
+                        : Text(
+                          '완료하기',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
-                      )
-                    : Text(
-                        '완료하기',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
               ),
             ),
           ),
@@ -488,23 +500,24 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                 height: buttonHeight,
                 decoration: BoxDecoration(color: Colors.blue),
                 child: Center(
-                  child: _isTakingPicture
-                      ? SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                  child:
+                      _isTakingPicture
+                          ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : Text(
+                            '사진 찍기',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : Text(
-                          '사진 찍기',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
               ),
             ),
@@ -600,83 +613,87 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                         width: coinSize,
                         height: coinSize,
                         child: Center(
-                          child: _selectedImage != null
-                              ? Image.file(
-                                  _selectedImage!,
-                                  width: coinSize,
-                                  height: coinSize,
-                                  fit: BoxFit.cover,
-                                )
-                              : (_isCameraMode &&
-                                    _isCameraInitialized &&
-                                    _selectedImage == null)
-                              ? RepaintBoundary(
-                                  key: _previewKey,
-                                  child: ClipOval(
-                                    child: SizedBox(
-                                      width: coinSize,
-                                      height: coinSize,
-                                      child: CameraPreview(_cameraController!),
-                                    ),
-                                  ),
-                                )
-                              : (_profileImageUrl != null &&
-                                    _profileImageUrl!.isNotEmpty)
-                              ? CachedNetworkImage(
-                                  imageUrl: _profileImageUrl!,
-                                  width: coinSize,
-                                  height: coinSize,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
+                          child:
+                              _selectedImage != null
+                                  ? Image.file(
+                                    _selectedImage!,
                                     width: coinSize,
                                     height: coinSize,
-                                    alignment: Alignment.center,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      Container(
+                                    fit: BoxFit.cover,
+                                  )
+                                  : (_isCameraMode &&
+                                      _isCameraInitialized &&
+                                      _selectedImage == null)
+                                  ? RepaintBoundary(
+                                    key: _previewKey,
+                                    child: ClipOval(
+                                      child: SizedBox(
                                         width: coinSize,
                                         height: coinSize,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: const Color.fromARGB(
-                                            255,
-                                            216,
-                                            216,
-                                            216,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.person,
-                                            size: coinSize * 0.7,
-                                            color: Colors.white,
-                                          ),
+                                        child: CameraPreview(
+                                          _cameraController!,
                                         ),
                                       ),
-                                )
-                              : Container(
-                                  width: coinSize,
-                                  height: coinSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
+                                    ),
+                                  )
+                                  : (_profileImageUrl != null &&
+                                      _profileImageUrl!.isNotEmpty)
+                                  ? CachedNetworkImage(
+                                    imageUrl: _profileImageUrl!,
+                                    width: coinSize,
+                                    height: coinSize,
+                                    fit: BoxFit.cover,
+                                    placeholder:
+                                        (context, url) => Container(
+                                          width: coinSize,
+                                          height: coinSize,
+                                          alignment: Alignment.center,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                    errorWidget:
+                                        (context, url, error) => Container(
+                                          width: coinSize,
+                                          height: coinSize,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              216,
+                                              216,
+                                              216,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.person,
+                                              size: coinSize * 0.7,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                  )
+                                  : Container(
+                                    width: coinSize,
+                                    height: coinSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: coinSize * 0.7,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.person,
-                                      size: coinSize * 0.7,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
                         ),
                       ),
                     ),
