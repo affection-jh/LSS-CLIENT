@@ -218,17 +218,30 @@ class _WaitingViewState extends State<WaitingView> {
       return Container();
     }
 
-    final myIndex =
-        session.players.indexWhere(
-          (player) => player.userId == UserService().getUser()?.userId,
-        ) +
-        1;
-    final currentPlayerIndex = session.currentPlayerIndex + 1;
+    final myIndex = session.players.indexWhere(
+      (player) => player.userId == UserService().getUser()?.userId,
+    );
+    final currentPlayerIndex = session.currentPlayerIndex;
     final isClockWise = session.isClockWise;
+    final totalPlayers = session.players.length;
 
-    final memberCountBeforeMe = isClockWise
-        ? (currentPlayerIndex - myIndex).abs()
-        : (myIndex - currentPlayerIndex).abs();
+    // 시계방향과 반시계방향에 따른 차례 계산
+    int memberCountBeforeMe;
+    if (isClockWise) {
+      // 시계방향: 현재 플레이어에서 내 차례까지의 거리
+      if (myIndex >= currentPlayerIndex) {
+        memberCountBeforeMe = myIndex - currentPlayerIndex;
+      } else {
+        memberCountBeforeMe = totalPlayers - currentPlayerIndex + myIndex;
+      }
+    } else {
+      // 반시계방향: 현재 플레이어에서 내 차례까지의 거리
+      if (myIndex <= currentPlayerIndex) {
+        memberCountBeforeMe = currentPlayerIndex - myIndex;
+      } else {
+        memberCountBeforeMe = currentPlayerIndex + (totalPlayers - myIndex);
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +282,7 @@ class _WaitingViewState extends State<WaitingView> {
     });
 
     return Container(
-      height: 300,
+      height: MediaQuery.of(context).size.height * 0.5,
       child: ListView.builder(
         scrollDirection: Axis.vertical,
         itemCount: players.length,

@@ -256,6 +256,8 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
   @override
   Widget build(BuildContext context) {
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
 
     return Stack(
       children: [
@@ -267,85 +269,116 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
           ),
           body: GestureDetector(
             onTap: () {
-              // 바깥쪽 탭 시 포커스 해제 (키보드 닫기)
               FocusScope.of(context).unfocus();
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isTablet ? 600 : double.infinity,
+                  maxHeight: isTablet
+                      ? MediaQuery.of(context).size.height
+                      : double.infinity, // 태블릿에서 세로 크기 조정
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: isTablet ? 20 : 0, // 태블릿에서 세로 패딩 추가
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('프로필을 설정해볼까요?', style: TextStyle(fontSize: 24)),
-                      SizedBox(height: 10),
-                      TextField(
-                        maxLength: 10,
-                        controller: _nameController,
-                        focusNode: _nameFocusNode, // FocusNode 연결
-                        cursorColor: Colors.blue,
-                        onChanged: (value) {
-                          setState(() {
-                            isEnabled = value.isNotEmpty ? true : false;
-                            // 사용자가 입력을 시작하면 에러 상태 해제
-                            if (_showNicknameError && value.isNotEmpty) {
-                              _showNicknameError = false;
-                            }
-                          });
-                        },
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: _showNicknameError
-                                  ? Colors.red
-                                  : const Color.fromARGB(255, 216, 216, 216),
-                              width: 1,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppUtil.getTopPadding(context) == 80
+                              ? SizedBox(height: 10)
+                              : Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '프로필을 설정해볼까요?',
+                                    style: TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                          TextField(
+                            maxLength: 10,
+                            controller: _nameController,
+                            focusNode: _nameFocusNode,
+                            cursorColor: Colors.blue,
+                            onChanged: (value) {
+                              setState(() {
+                                isEnabled = value.isNotEmpty ? true : false;
+                                if (_showNicknameError && value.isNotEmpty) {
+                                  _showNicknameError = false;
+                                }
+                              });
+                            },
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showNicknameError
+                                      ? Colors.red
+                                      : const Color.fromARGB(
+                                          255,
+                                          216,
+                                          216,
+                                          216,
+                                        ),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: _showNicknameError
+                                      ? Colors.red
+                                      : Colors.blue,
+                                  width: 1,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Colors.red,
+                                  width: 1,
+                                ),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Colors.red,
+                                  width: 1,
+                                ),
+                              ),
+                              fillColor: Colors.white,
+                              filled: true,
+                              labelStyle: TextStyle(color: Colors.black),
+                              hintText: '닉네임을 입력해주세요',
+                              hintStyle: TextStyle(
+                                color: const Color.fromARGB(255, 48, 48, 48),
+                              ),
+                              errorText: _showNicknameError
+                                  ? '닉네임이 필요해요'
+                                  : null,
+                              errorStyle: TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color: _showNicknameError
-                                  ? Colors.red
-                                  : Colors.blue,
-                              width: 1,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.red, width: 1),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.red, width: 1),
-                          ),
-                          fillColor: Colors.white,
-                          filled: true,
-                          labelStyle: TextStyle(color: Colors.black),
-                          hintText: '닉네임을 입력해주세요',
-                          hintStyle: TextStyle(
-                            color: const Color.fromARGB(255, 48, 48, 48),
-                          ),
-                          errorText: _showNicknameError ? '닉네임이 필요해요' : null,
-                          errorStyle: TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
-                        ),
+                        ],
+                      ),
+
+                      Column(
+                        children: [
+                          if (!isKeyboardOpen) _buildLeeImage(null),
+                          if (!isKeyboardOpen) _buildActionButton(),
+                        ],
                       ),
                     ],
                   ),
-                  Column(
-                    children: [
-                      if (!isKeyboardOpen) _buildLeeImage(null),
-                      if (!isKeyboardOpen)
-                        _buildActionButton(), // 키보드가 열렸을 때 버튼 숨기기
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -360,13 +393,16 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
               ),
             ),
           ),
-        // 검은 오버레이 (흰 화면 가리기)
         if (_showBlackOverlay) Container(color: Colors.black),
       ],
     );
   }
 
   Widget _buildSkipButton(Function() onTap, bool isEnabled) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final buttonHeight = isTablet ? 55.0 : 60.0; // 태블릿에서 버튼 높이 조정
+
     // 버튼 활성화 조건: 닉네임이 비어있지 않고, (닉네임이 바뀌었거나 이미지를 새로 선택한 경우)
     final bool isNicknameNotEmpty = _nameController.text.trim().isNotEmpty;
     final bool isNicknameChanged =
@@ -378,16 +414,19 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         !_isUploading; // 텍스트 필드 + 변경사항 + 업로드 중이 아님
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24, top: 2),
+      padding: EdgeInsets.only(
+        bottom: isTablet ? 20.0 : 24.0,
+        top: isTablet ? 2.0 : 2.0,
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(isTablet ? 12 : 15),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: canSubmit ? onTap : null,
             child: Ink(
               width: double.infinity,
-              height: 60,
+              height: buttonHeight,
               decoration: BoxDecoration(
                 color: canSubmit
                     ? Colors.blue
@@ -425,12 +464,19 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
   }
 
   Widget _buildActionButton() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final buttonHeight = isTablet ? 55.0 : 60.0; // 태블릿에서 버튼 높이 조정
+
     // 카메라 모드에서 사진을 아직 안 찍었으면 사진찍기 버튼
     if (_isCameraMode && _isCameraInitialized && _selectedImage == null) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 24, top: 2),
+        padding: EdgeInsets.only(
+          bottom: isTablet ? 20.0 : 24.0,
+          top: isTablet ? 2.0 : 2.0,
+        ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(isTablet ? 12 : 15),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -439,7 +485,7 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
               },
               child: Ink(
                 width: double.infinity,
-                height: 60,
+                height: buttonHeight,
                 decoration: BoxDecoration(color: Colors.blue),
                 child: Center(
                   child: _isTakingPicture

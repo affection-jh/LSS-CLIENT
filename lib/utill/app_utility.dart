@@ -75,7 +75,8 @@ class AppUtil {
             margin: EdgeInsets.only(
               left: 16,
               right: 16,
-              bottom: MediaQuery.of(context).size.height - 150,
+              bottom:
+                  MediaQuery.of(context).size.height - getTopPadding(context),
             ),
           ),
         );
@@ -84,5 +85,33 @@ class AppUtil {
       // context가 이미 dispose된 경우 무시
       print('SnackBar 표시 실패: $e');
     }
+  }
+
+  static double getTopPadding(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+    final devicePixelRatio = mediaQuery.devicePixelRatio;
+
+    // 베젤이 있는 기기 판단 (더 정확한 방법)
+    bool hasBezel = false;
+
+    // iPhone SE 시리즈 판단
+    if (screenHeight <= 667 && screenWidth <= 375) {
+      hasBezel = true;
+    }
+
+    // iPhone 8 이하 판단
+    if (screenHeight <= 667 && screenWidth <= 375 && devicePixelRatio <= 2.0) {
+      hasBezel = true;
+    }
+
+    // 베젤이 있는 기기: 더 큰 패딩
+    if (hasBezel) {
+      return 80.0;
+    }
+
+    // 노치/다이나믹 아일랜드 기기: 적은 패딩
+    return 150.0;
   }
 }
