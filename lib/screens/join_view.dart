@@ -1,4 +1,5 @@
 import 'package:esc/data/player.dart';
+import 'package:esc/screens/test_track.dart';
 import 'package:esc/service/error_service.dart';
 import 'package:esc/service/user_service.dart';
 import 'package:esc/service/manage_service.dart';
@@ -155,8 +156,8 @@ class _GameEnteringViewState extends State<GameJoiningView>
               _isError
                   ? Colors.grey.shade300
                   : (_isButtonEnabled
-                        ? ColorPalette.secondaryColor
-                        : Colors.grey.shade300),
+                      ? ColorPalette.secondaryColor
+                      : Colors.grey.shade300),
             ),
           ],
         ),
@@ -200,6 +201,15 @@ class _GameEnteringViewState extends State<GameJoiningView>
 
                   // 입장 요청
                   String code = _controller.text;
+
+                  if (code == "123456") {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => TestTrack()),
+                    );
+                    return;
+                  }
+
                   gameManager.joinSession(code, me);
                   await Future.delayed(Duration(milliseconds: 300));
 
@@ -236,25 +246,26 @@ class _GameEnteringViewState extends State<GameJoiningView>
               width: double.infinity,
               height: 60,
               child: Center(
-                child: _isEntering
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                child:
+                    _isEntering
+                        ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          '입장하기',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      )
-                    : Text(
-                        '입장하기',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ),
           ),
@@ -274,7 +285,7 @@ class _GameEnteringViewState extends State<GameJoiningView>
       _isEntering = false;
     });
 
-    AppUtil.showErrorSnackbar(context, message: "서버 연결에 실패했어요ㅠ.");
+    AppUtil.showErrorSnackbar(context, message: "서버 연결에 실패했어요.");
     Navigator.pop(context);
   }
 }

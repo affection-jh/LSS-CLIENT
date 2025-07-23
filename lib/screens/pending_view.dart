@@ -83,77 +83,78 @@ class _PendingViewState extends State<PendingView> {
             gameManager.currentSession!.presidentId ==
             UserService().getUser()?.userId;
 
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: buildAppBar(context, isPresident),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '장군님이 도착하셨어요.',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+        return WillPopScope(
+          onWillPop: () async {
+            return false;
+          },
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: buildAppBar(context, isPresident),
+            body: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                gameManager.currentSession!.category,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '입장코드를 공유해볼까요?',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            _buildCodeView(gameManager),
-                            const SizedBox(height: 30),
 
-                            Text(
-                              '${gameManager.currentSession!.players.length}명이 입장했어요.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
+                              const SizedBox(height: 15),
+                              _buildCodeView(gameManager),
+                              const SizedBox(height: 30),
+
+                              Text(
+                                '${gameManager.currentSession!.players.length}명이 입장했어요.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0,
-                          vertical: 10,
-                        ),
-                        child: GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 1.8,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                              ),
-                          itemCount: gameManager.currentSession!.players.length,
-                          itemBuilder: (context, index) => _buildPendingMember(
-                            gameManager.currentSession!.players[index],
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0,
+                            vertical: 10,
+                          ),
+                          child: GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 1.8,
+                                  mainAxisSpacing: 10,
+                                  crossAxisSpacing: 10,
+                                ),
+                            itemCount:
+                                gameManager.currentSession!.players.length,
+                            itemBuilder:
+                                (context, index) => _buildPendingMember(
+                                  gameManager.currentSession!.players[index],
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _buildStartButton(gameManager),
-              SizedBox(height: 10), // 하단에 고정
-            ],
+                _buildStartButton(gameManager),
+                SizedBox(height: 10), // 하단에 고정
+              ],
+            ),
           ),
         );
       },
@@ -234,9 +235,10 @@ class _PendingViewState extends State<PendingView> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Material(
-          color: user.userId == UserService().getUser()?.userId
-              ? const Color.fromARGB(255, 255, 240, 240)
-              : Colors.white,
+          color:
+              user.userId == UserService().getUser()?.userId
+                  ? const Color.fromARGB(255, 255, 240, 240)
+                  : Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
@@ -246,9 +248,8 @@ class _PendingViewState extends State<PendingView> {
                   Text(
                     user.name,
                     style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width > 600
-                          ? 30
-                          : 16,
+                      fontSize:
+                          MediaQuery.of(context).size.width > 600 ? 30 : 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -293,19 +294,20 @@ class _PendingViewState extends State<PendingView> {
                   _handleStartGame(gameManager);
                 },
                 child: Center(
-                  child: _isStartLoading
-                      ? CircularProgressIndicator(
-                          strokeWidth: 1,
-                          color: Colors.white,
-                        )
-                      : Text(
-                          '시작하기',
-                          style: TextStyle(
+                  child:
+                      _isStartLoading
+                          ? CircularProgressIndicator(
+                            strokeWidth: 1,
                             color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          )
+                          : Text(
+                            '시작하기',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
                 ),
               ),
             ),

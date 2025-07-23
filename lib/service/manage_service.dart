@@ -129,12 +129,16 @@ class GameManager extends ChangeNotifier {
   }
 
   // 게임 액션들
-  void createSession(String userId, String name) {
+  void createSession(String userId, String name, String category) {
     print('[GameManager] 세션 생성 요청: userId=$userId, name=$name');
     if (!_checkConnectionBeforeRequest()) return;
 
     currentUserId = userId;
-    sendRequest('create-session', {'userId': userId, 'name': name});
+    sendRequest('create-session', {
+      'userId': userId,
+      'name': name,
+      'category': category,
+    });
   }
 
   void joinSession(String entryCode, Player player) {

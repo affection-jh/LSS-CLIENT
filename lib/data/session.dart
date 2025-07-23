@@ -2,6 +2,7 @@ import 'package:esc/data/player.dart';
 
 class Session {
   final String sessionId;
+  final String category;
   final String entryCode;
   final String presidentId;
   final List<Player> players;
@@ -17,6 +18,7 @@ class Session {
 
   Session({
     required this.sessionId,
+    required this.category,
     required this.entryCode,
     required this.presidentId,
 
@@ -35,6 +37,7 @@ class Session {
   factory Session.fromJson(Map<String, dynamic> json) {
     return Session(
       sessionId: json['sessionId'],
+      category: json['category'] ?? '',
       entryCode: json['entryCode']?.toString() ?? '',
       presidentId: json['presidentId'] ?? '',
       players:
@@ -46,21 +49,24 @@ class Session {
       isClockWise: json['clockWise'] ?? json['isClockWise'] ?? true,
       firstCoinState: json['firstCoinState'],
       secondCoinState: json['secondCoinState'],
-      currentPlayer: json['currentPlayer'] != null
-          ? Player.fromJson(json['currentPlayer'])
-          : null,
+      currentPlayer:
+          json['currentPlayer'] != null
+              ? Player.fromJson(json['currentPlayer'])
+              : null,
       isMyTurn: json['myTurn'] ?? json['isMyTurn'] ?? false,
       isPresident: json['president'] ?? json['isPresident'] ?? false,
       gameState: json['gameState'] ?? 'WAITING_ROOM',
-      gameEndTime: json['gameEndTime'] != null
-          ? DateTime.tryParse(json['gameEndTime'])
-          : null,
+      gameEndTime:
+          json['gameEndTime'] != null
+              ? DateTime.tryParse(json['gameEndTime'])
+              : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'sessionId': sessionId,
+      'category': category,
       'entryCode': entryCode,
       'presidentId': presidentId,
       'players': players.map((player) => player.toJson()).toList(),

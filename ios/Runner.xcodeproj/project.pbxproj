@@ -15,6 +15,7 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		C10C65A12E2F9FE400D7D6BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C10C65A02E2F9FE400D7D6BF /* Assets.xcassets */; };
+		C6C245FC3FEE7FF081DF1AA7 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0067706186B7AC503F613513 /* Pods_Runner.framework */; };
 		C7C0DF427CC01AFBE100CFE4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D0E6CA791CFBDC60E4C47A36 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -82,6 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6C245FC3FEE7FF081DF1AA7 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,7 +495,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 33G7A7TQ44;
 				ENABLE_BITCODE = NO;
@@ -687,7 +689,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 33G7A7TQ44;
 				ENABLE_BITCODE = NO;
@@ -721,7 +723,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 33G7A7TQ44;
 				ENABLE_BITCODE = NO;

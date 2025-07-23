@@ -4,25 +4,37 @@ import 'package:esc/utill/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-PreferredSizeWidget buildAppBar(BuildContext context, bool isPresident) {
+PreferredSizeWidget buildAppBar(
+  BuildContext context,
+  bool isPresident, {
+  String? category,
+}) {
   return AppBar(
     backgroundColor: Colors.white,
     scrolledUnderElevation: 0,
     leading: Builder(
-      builder: (context) => IconButton(
-        onPressed: () async {
-          bool? result = await AppUtil.ShowExitDiaglog(context, isPresident);
-          if (result == true) {
-            context.read<GameManager>().disconnect();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => HomeView()),
-              (route) => false,
-            );
-          }
-        },
-        icon: Icon(Icons.arrow_back_ios_new_rounded),
-      ),
+      builder:
+          (context) => IconButton(
+            onPressed: () async {
+              bool? result = await AppUtil.ShowExitDiaglog(
+                context,
+                isPresident,
+              );
+              if (result == true) {
+                context.read<GameManager>().disconnect();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeView()),
+                  (route) => false,
+                );
+              }
+            },
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+    ),
+    title: Text(
+      category ?? '',
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
     ),
   );
 }

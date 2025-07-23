@@ -1,5 +1,5 @@
 import 'package:esc/screens/join_view.dart';
-import 'package:esc/screens/making_view.dart';
+import 'package:esc/screens/category_selection_view.dart';
 import 'package:esc/screens/onboarding_view.dart';
 import 'package:esc/screens/setting_view.dart';
 import 'package:esc/service/manage_service.dart';
@@ -28,10 +28,15 @@ class _HomeViewState extends State<HomeView> {
     double width = MediaQuery.of(context).size.width;
 
     if (UserService().getUser()?.name.isEmpty ?? true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnboardingView()),
-      );
+      // 네비게이션 중복 방지를 위해 WidgetsBinding 사용
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => OnboardingView()),
+          );
+        }
+      });
     }
     return Scaffold(
       body: Container(
@@ -98,7 +103,7 @@ class _HomeViewState extends State<HomeView> {
                               ),
                             ),
                             Text(
-                              "오늘도 달려볼까요?",
+                              "오늘도 행운을 빌어요",
                               style: TextStyle(
                                 fontSize: 30,
                                 color: const Color.fromARGB(255, 30, 30, 30),
@@ -144,7 +149,7 @@ class _HomeViewState extends State<HomeView> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => BuildingView()),
+              MaterialPageRoute(builder: (context) => CategorySelectionView()),
             );
           },
           borderRadius: BorderRadius.circular(30),
@@ -234,7 +239,7 @@ class _HomeViewState extends State<HomeView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 20),
+                        SizedBox(height: 15),
                         Text(
                           "게임 참여하기",
                           style: TextStyle(

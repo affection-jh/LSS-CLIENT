@@ -26,7 +26,11 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: buildAppBar(context, isPresident),
+      appBar: buildAppBar(
+        context,
+        isPresident,
+        category: gameManager.currentSession!.category,
+      ),
       body: Consumer<GameManager>(
         builder: (context, gameManager, child) {
           return Center(
@@ -187,50 +191,51 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                   width: coinSize,
                   height: coinSize,
                   child: Center(
-                    child: imageUrl != null
-                        ? Image.network(
-                            imageUrl,
-                            width: coinSize,
-                            height: coinSize,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: coinSize,
-                                height: coinSize,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: const Color.fromARGB(
-                                    255,
-                                    216,
-                                    216,
-                                    216,
+                    child:
+                        imageUrl != null
+                            ? Image.network(
+                              imageUrl,
+                              width: coinSize,
+                              height: coinSize,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: coinSize,
+                                  height: coinSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      216,
+                                      216,
+                                      216,
+                                    ),
                                   ),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.person,
-                                    size: coinSize * 0.7,
-                                    color: Colors.white,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.person,
+                                      size: coinSize * 0.7,
+                                      color: Colors.white,
+                                    ),
                                   ),
+                                );
+                              },
+                            )
+                            : Container(
+                              width: coinSize,
+                              height: coinSize,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color.fromARGB(255, 216, 216, 216),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.person,
+                                  size: coinSize * 0.7,
+                                  color: Colors.white,
                                 ),
-                              );
-                            },
-                          )
-                        : Container(
-                            width: coinSize,
-                            height: coinSize,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color.fromARGB(255, 216, 216, 216),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.person,
-                                size: coinSize * 0.7,
-                                color: Colors.white,
                               ),
                             ),
-                          ),
                   ),
                 ),
               ),

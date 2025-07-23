@@ -94,7 +94,7 @@ class _OnboardingViewState extends State<OnboardingView> {
             // 고정 텍스트
             const SizedBox(height: 40),
             const Text(
-              '이순신게임,',
+              '이순신랠리,',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 28,

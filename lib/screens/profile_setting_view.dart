@@ -38,6 +38,7 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
   bool _isCameraMode = false; // 카메라 프리뷰 활성화 여부
   bool _isTakingPicture = false; // 사진 촬영 중 여부
   bool _showBlackOverlay = false; // 검은 오버레이 표시 여부
+  bool _isNavigating = false; // 네비게이션 중복 방지 플래그
 
   @override
   void initState() {
@@ -60,7 +61,9 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
   }
 
   void _onInputChanged() {
-    setState(() {}); // 입력값 변경 시 버튼 활성화 조건 재평가
+    if (mounted) {
+      setState(() {}); // 입력값 변경 시 버튼 활성화 조건 재평가
+    }
   }
 
   Future<void> _initCamera() async {
@@ -76,9 +79,11 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         enableAudio: false,
       );
       await _cameraController!.initialize();
-      setState(() {
-        _isCameraInitialized = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isCameraInitialized = true;
+        });
+      }
     } catch (e) {
       print('카메라 초기화 오류: $e');
     }
@@ -114,10 +119,12 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                 title: Text('카메라로 촬영'),
                 onTap: () {
                   Navigator.pop(context);
-                  setState(() {
-                    _isCameraMode = true;
-                    _selectedImage = null;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _isCameraMode = true;
+                      _selectedImage = null;
+                    });
+                  }
                 },
               ),
               ListTile(
@@ -137,12 +144,14 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                   if (_profileImageUrl != null) {
                     await UserService().deleteProfileImage(); // 이 함수는 직접 구현 필요
                   }
-                  setState(() {
-                    _selectedImage = null;
-                    _profileImageUrl = null;
-                    _isCameraMode = false;
-                    _hasChanges = true; // 변경사항 있음
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _selectedImage = null;
+                      _profileImageUrl = null;
+                      _isCameraMode = false;
+                      _hasChanges = true; // 변경사항 있음
+                    });
+                  }
                 },
               ),
             ],
@@ -161,10 +170,12 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         imageQuality: 80,
       );
       if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-          _isUploading = true; // 업로드 시작
-        });
+        if (mounted) {
+          setState(() {
+            _selectedImage = File(image.path);
+            _isUploading = true; // 업로드 시작
+          });
+        }
 
         // 즉시 업로드 시작
         _uploadImageInBackground(_selectedImage!);
@@ -183,20 +194,26 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         _hasChanges = true; // 변경사항 표시
         // 업로드 완료 후 UserService에서 최신 데이터 가져오기
         await UserService().initializeUser(UserService().userId!);
-        setState(() {
-          _profileImageUrl = UserService().profileImageUrl;
-          _isUploading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _profileImageUrl = UserService().profileImageUrl;
+            _isUploading = false;
+          });
+        }
       } else {
-        setState(() {
-          _isUploading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+        }
         AppUtil.showErrorSnackbar(context, message: '이미지 업로드에 실패했어요.');
       }
     } catch (e) {
-      setState(() {
-        _isUploading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
       print('백그라운드 업로드 오류: $e');
       AppUtil.showErrorSnackbar(context, message: '이미지 업로드 중 오류가 발생했어요.');
     }
@@ -206,9 +223,11 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
   Future<void> _capturePreview() async {
     if (_isTakingPicture) return;
 
-    setState(() {
-      _isTakingPicture = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isTakingPicture = true;
+      });
+    }
 
     try {
       // RepaintBoundary를 사용해서 프리뷰 위젯을 이미지로 캡처
@@ -232,28 +251,34 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         // 이미지 미리 캐싱
         await precacheImage(FileImage(file), context);
 
-        setState(() {
-          _selectedImage = file;
-          _isCameraMode = false;
-          _isTakingPicture = false;
-          _isUploading = true; // 업로드 시작
-          if (!isEnabled) {
-            isEnabled = true;
-          }
-        });
+        if (mounted) {
+          setState(() {
+            _selectedImage = file;
+            _isCameraMode = false;
+            _isTakingPicture = false;
+            _isUploading = true; // 업로드 시작
+            if (!isEnabled) {
+              isEnabled = true;
+            }
+          });
+        }
 
         // 즉시 업로드 시작
         _uploadImageInBackground(file);
       } else {
-        setState(() {
-          _isTakingPicture = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isTakingPicture = false;
+          });
+        }
         print('이미지 캡처 실패');
       }
     } catch (e) {
-      setState(() {
-        _isTakingPicture = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTakingPicture = false;
+        });
+      }
       print('프리뷰 캡처 오류: $e');
     }
   }
@@ -312,12 +337,14 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                             focusNode: _nameFocusNode,
                             cursorColor: Colors.blue,
                             onChanged: (value) {
-                              setState(() {
-                                isEnabled = value.isNotEmpty ? true : false;
-                                if (_showNicknameError && value.isNotEmpty) {
-                                  _showNicknameError = false;
-                                }
-                              });
+                              if (mounted) {
+                                setState(() {
+                                  isEnabled = value.isNotEmpty ? true : false;
+                                  if (_showNicknameError && value.isNotEmpty) {
+                                    _showNicknameError = false;
+                                  }
+                                });
+                              }
                             },
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
@@ -529,16 +556,20 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
       return _buildSkipButton(() async {
         // 닉네임이 비어있으면 에러 표시
         if (_nameController.text.trim().isEmpty) {
-          setState(() {
-            _showNicknameError = true;
-          });
+          if (mounted) {
+            setState(() {
+              _showNicknameError = true;
+            });
+          }
           return;
         }
 
         if (_nameController.text.isEmpty) {
-          setState(() {
-            isEnabled = true;
-          });
+          if (mounted) {
+            setState(() {
+              isEnabled = true;
+            });
+          }
         } else if (widget.callFromWhere == 'setting') {
           // 업로드가 진행 중이면 완료될 때까지 대기
           while (_isUploading) {
@@ -563,10 +594,15 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
           if (nickname.isNotEmpty) {
             await UserService().updateNickname(nickname);
           }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeView()),
-          );
+
+          // 네비게이션 중복 방지
+          if (mounted && !_isNavigating) {
+            _isNavigating = true;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeView()),
+            );
+          }
         }
       }, _nameController.text.isNotEmpty);
     }
@@ -650,6 +686,12 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
                                           alignment: Alignment.center,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              255,
+                                              255,
+                                              255,
+                                            ),
                                           ),
                                         ),
                                     errorWidget:
@@ -733,9 +775,11 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
         if (isCameraPreview || _isTakingPicture) {
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _isCameraMode = false;
-              });
+              if (mounted) {
+                setState(() {
+                  _isCameraMode = false;
+                });
+              }
             },
             child: imageWidget,
           );

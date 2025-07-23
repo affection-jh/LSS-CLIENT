@@ -29,6 +29,7 @@ class _SettingViewState extends State<SettingView> {
 
   @override
   void dispose() {
+    _nicknameController.dispose();
     super.dispose();
   }
 
@@ -73,8 +74,9 @@ class _SettingViewState extends State<SettingView> {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              ProfileSettingView(callFromWhere: 'setting'),
+                          builder:
+                              (context) =>
+                                  ProfileSettingView(callFromWhere: 'setting'),
                         ),
                       );
 
@@ -84,9 +86,11 @@ class _SettingViewState extends State<SettingView> {
                         _nicknameController.text =
                             UserService().getUser()?.name ?? '사용자님';
 
-                        setState(() {
-                          _isLoadingProfileImage = true;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isLoadingProfileImage = true;
+                          });
+                        }
 
                         // UserService는 이미 업데이트되었으므로 바로 이미지 캐싱
                         if (UserService().profileImageUrl != null &&
@@ -109,9 +113,11 @@ class _SettingViewState extends State<SettingView> {
                           }
                         }
 
-                        setState(() {
-                          _isLoadingProfileImage = false;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isLoadingProfileImage = false;
+                          });
+                        }
                       }
                     },
                     child: Stack(
@@ -121,32 +127,9 @@ class _SettingViewState extends State<SettingView> {
                           height: 120,
                           decoration: BoxDecoration(shape: BoxShape.circle),
                           child: ClipOval(
-                            child: _isLoadingProfileImage
-                                ? Container(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
-                                    ),
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: const Color.fromARGB(
-                                          255,
-                                          255,
-                                          255,
-                                          255,
-                                        ),
-                                        strokeWidth: 1,
-                                      ),
-                                    ),
-                                  )
-                                : UserService().profileImageUrl != null &&
-                                      UserService().profileImageUrl!.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: UserService().profileImageUrl!,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
+                            child:
+                                _isLoadingProfileImage
+                                    ? Container(
                                       color: const Color.fromARGB(
                                         255,
                                         216,
@@ -164,36 +147,67 @@ class _SettingViewState extends State<SettingView> {
                                           strokeWidth: 1,
                                         ),
                                       ),
+                                    )
+                                    : UserService().profileImageUrl != null &&
+                                        UserService()
+                                            .profileImageUrl!
+                                            .isNotEmpty
+                                    ? CachedNetworkImage(
+                                      imageUrl: UserService().profileImageUrl!,
+                                      fit: BoxFit.cover,
+                                      placeholder:
+                                          (context, url) => Container(
+                                            color: const Color.fromARGB(
+                                              255,
+                                              216,
+                                              216,
+                                              216,
+                                            ),
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                color: const Color.fromARGB(
+                                                  255,
+                                                  255,
+                                                  255,
+                                                  255,
+                                                ),
+                                                strokeWidth: 1,
+                                              ),
+                                            ),
+                                          ),
+                                      errorWidget: (
+                                        context,
+                                        error,
+                                        stackTrace,
+                                      ) {
+                                        return Container(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            216,
+                                            216,
+                                            216,
+                                          ),
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 60,
+                                            color: Colors.white,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                    : Container(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                    errorWidget: (context, error, stackTrace) {
-                                      return Container(
-                                        color: const Color.fromARGB(
-                                          255,
-                                          216,
-                                          216,
-                                          216,
-                                        ),
-                                        child: Icon(
-                                          Icons.person,
-                                          size: 60,
-                                          color: Colors.white,
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Container(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
-                                    ),
-                                    child: Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.white,
-                                    ),
-                                  ),
                           ),
                         ),
                       ],
@@ -210,8 +224,10 @@ class _SettingViewState extends State<SettingView> {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ProfileSettingView(callFromWhere: 'setting'),
+                              builder:
+                                  (context) => ProfileSettingView(
+                                    callFromWhere: 'setting',
+                                  ),
                             ),
                           );
 
@@ -813,51 +829,50 @@ class _SettingViewState extends State<SettingView> {
 
     if (confirmed != true) return;
 
-    // 로딩 다이얼로그 표시
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 20),
-              CircularProgressIndicator(
-                color: const Color.fromARGB(255, 255, 143, 143),
-                strokeWidth: 2,
-              ),
-              SizedBox(height: 16),
-              Text(
-                '재인증 및 계정 삭제 중...',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              SizedBox(height: 10),
-            ],
-          ),
-        );
-      },
-    );
-
     try {
+      // 로딩 다이얼로그 표시
+      showDialog(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 20),
+                CircularProgressIndicator(
+                  color: const Color.fromARGB(255, 255, 143, 143),
+                  strokeWidth: 2,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  '재인증 및 계정 삭제 중...',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          );
+        },
+      );
+
       // 원자적 탈퇴 처리
       bool success = await AuthService.deleteAccount();
 
-      // 로딩 다이얼로그 닫기
+      // 로딩 다이얼로그 닫기 (성공/실패 관계없이)
       if (mounted) {
-        Navigator.pop(context);
+        print('로딩 다이얼로그 닫기');
+        Navigator.of(context, rootNavigator: false).pop();
       }
 
       if (success) {
         // 탈퇴 성공 - 온보딩으로 이동
         if (mounted) {
-          // 약간의 딜레이 후 온보딩으로 이동
-          await Future.delayed(Duration(milliseconds: 500));
-
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => OnboardingView()),
@@ -873,10 +888,9 @@ class _SettingViewState extends State<SettingView> {
     } catch (e) {
       print('계정 탈퇴 처리 중 예외: $e');
 
-      // 로딩 다이얼로그 닫기
+      // 로딩 다이얼로그 닫기 (예외 발생 시에도)
       if (mounted) {
-        Navigator.pop(context);
-
+        Navigator.of(context, rootNavigator: false).pop();
         AppUtil.showErrorSnackbar(context, message: '계정 탈퇴 중 오류가 발생했어요.');
       }
     }

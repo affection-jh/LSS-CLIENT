@@ -167,10 +167,11 @@ class AuthService {
 
       // 1. Firebase Storage에서 프로필 이미지 삭제
       try {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .get();
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
         if (userDoc.exists) {
           final userData = userDoc.data();
           final profileImageUrl = userData?['profileImageUrl'] as String?;
@@ -193,36 +194,7 @@ class AuthService {
       await FirebaseFirestore.instance.collection('users').doc(userId).delete();
       print("사용자 데이터 삭제 완료");
 
-      // 3. 사용자가 참여 중인 세션에서 제거
-      final sessionsRef = FirebaseFirestore.instance.collection('sessions');
-      final sessionsSnapshot = await sessionsRef
-          .where('players', arrayContains: userId)
-          .get();
-
-      for (var doc in sessionsSnapshot.docs) {
-        final sessionData = doc.data();
-        List<String> players = List<String>.from(sessionData['players'] ?? []);
-
-        if (players.contains(userId)) {
-          players.remove(userId);
-
-          // 세션의 플레이어 목록 업데이트
-          await doc.reference.update({'players': players});
-
-          // 만약 삭제된 사용자가 방장이었다면, 다른 플레이어에게 방장 권한 이전
-          if (sessionData['presidentId'] == userId && players.isNotEmpty) {
-            await doc.reference.update({'presidentId': players.first});
-          }
-
-          // 세션에 플레이어가 없으면 세션 삭제
-          if (players.isEmpty) {
-            await doc.reference.delete();
-          }
-        }
-      }
-      print("세션 데이터 정리 완료");
-
-      // 4. Firebase Auth에서 계정 삭제
+      // 3. Firebase Auth에서 계정 삭제
       await user.delete();
       print("Firebase Auth 계정 삭제 완료");
 

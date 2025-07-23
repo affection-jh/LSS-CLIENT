@@ -16,7 +16,7 @@ class UserService {
 
   // getter들
   String? get userId => _userId;
-  String get nickname => _name;
+  String get name => _name;
   String? get profileImageUrl => _profileImageUrl;
 
   // static getter로 기존 코드와 호환성 유지
@@ -26,7 +26,7 @@ class UserService {
         value,
       ) {
         _userId = value.data()?['userId'] ?? '';
-        _name = value.data()?['nickname'] ?? '';
+        _name = value.data()?['name'] ?? '';
         _profileImageUrl = value.data()?['profileImageUrl'] ?? '';
       });
 
@@ -47,15 +47,15 @@ class UserService {
     );
   }
 
-  Future<bool> updateNickname(String newNickname) async {
+  Future<bool> updateNickname(String name) async {
     try {
       if (_userId == null) return false;
 
       await FirebaseFirestore.instance.collection('users').doc(_userId).update({
-        'nickname': newNickname,
+        'name': name,
       });
 
-      _name = newNickname;
+      _name = name;
       return true;
     } catch (e) {
       print('닉네임 업데이트 실패: $e');

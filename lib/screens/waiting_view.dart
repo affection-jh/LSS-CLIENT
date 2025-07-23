@@ -58,7 +58,11 @@ class _WaitingViewState extends State<WaitingView> {
           },
           child: Scaffold(
             backgroundColor: Colors.white,
-            appBar: buildAppBar(context, isPresident),
+            appBar: buildAppBar(
+              context,
+              isPresident,
+              category: gameManager.currentSession!.category,
+            ),
             body: SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
@@ -68,6 +72,7 @@ class _WaitingViewState extends State<WaitingView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    SizedBox(height: 24),
                     _buildHeader(gameManager),
                     SizedBox(height: 24),
                     _buildCurrentPlayerCard(gameManager),
@@ -172,36 +177,38 @@ class _WaitingViewState extends State<WaitingView> {
                 children: [
                   // 첫 번째 동전
                   Center(
-                    child: session.firstCoinState == "null"
-                        ? PulseQuestionMark(size: 120)
-                        : session.firstCoinState == "head"
-                        ? Image.asset(
-                            'assets/coin_head.png',
-                            width: 120,
-                            height: 120,
-                          )
-                        : Image.asset(
-                            'assets/coin_tail.png',
-                            width: 120,
-                            height: 120,
-                          ),
+                    child:
+                        session.firstCoinState == "null"
+                            ? PulseQuestionMark(size: 120)
+                            : session.firstCoinState == "head"
+                            ? Image.asset(
+                              'assets/coin_head.png',
+                              width: 120,
+                              height: 120,
+                            )
+                            : Image.asset(
+                              'assets/coin_tail.png',
+                              width: 120,
+                              height: 120,
+                            ),
                   ),
 
                   SizedBox(width: 24),
                   Center(
-                    child: session.secondCoinState == "null"
-                        ? PulseQuestionMark(size: 120)
-                        : session.secondCoinState == "head"
-                        ? Image.asset(
-                            'assets/coin_head.png',
-                            width: 120,
-                            height: 120,
-                          )
-                        : Image.asset(
-                            'assets/coin_tail.png',
-                            width: 120,
-                            height: 120,
-                          ),
+                    child:
+                        session.secondCoinState == "null"
+                            ? PulseQuestionMark(size: 120)
+                            : session.secondCoinState == "head"
+                            ? Image.asset(
+                              'assets/coin_head.png',
+                              width: 120,
+                              height: 120,
+                            )
+                            : Image.asset(
+                              'assets/coin_tail.png',
+                              width: 120,
+                              height: 120,
+                            ),
                   ),
                 ],
               ),
@@ -326,67 +333,71 @@ class _WaitingViewState extends State<WaitingView> {
             height: 50,
             decoration: BoxDecoration(shape: BoxShape.circle),
             child: Center(
-              child: player.profileImageUrl != null
-                  ? ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: player.profileImageUrl!,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
+              child:
+                  player.profileImageUrl != null
+                      ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: player.profileImageUrl!,
                           width: 50,
                           height: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: ColorPalette.primaryColor.withOpacity(0.3),
-                          ),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: ColorPalette.primaryColor,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) {
-                          return Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: ColorPalette.primaryColor,
-                            ),
-                            child: Center(
-                              child: Text(
-                                player.name.substring(0, 1).toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          fit: BoxFit.cover,
+                          placeholder:
+                              (context, url) => Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: ColorPalette.primaryColor.withOpacity(
+                                    0.3,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: ColorPalette.primaryColor,
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               ),
+                          errorWidget: (context, url, error) {
+                            return Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: ColorPalette.primaryColor,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  player.name.substring(0, 1).toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                      : Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color.fromARGB(255, 255, 180, 180),
+                        ),
+                        child: Center(
+                          child: Text(
+                            player.name.substring(0, 1).toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                          );
-                        },
-                      ),
-                    )
-                  : Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color.fromARGB(255, 255, 180, 180),
-                      ),
-                      child: Center(
-                        child: Text(
-                          player.name.substring(0, 1).toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                         ),
                       ),
-                    ),
             ),
           ),
           SizedBox(width: 16),
