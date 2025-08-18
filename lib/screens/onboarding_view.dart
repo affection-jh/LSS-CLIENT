@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:esc/data/player.dart';
+import 'package:esc/screens/guest_profile_setting_view.dart';
 import 'package:esc/screens/home_view.dart';
 import 'package:esc/screens/profile_setting_view.dart';
 import 'package:esc/service/auth_service.dart';
@@ -130,6 +131,8 @@ class _OnboardingViewState extends State<OnboardingView> {
   Widget _buildLoginButtons() {
     return Column(
       children: [
+        _buildGuestButton(),
+        const SizedBox(height: 10),
         _buildGoogleLoginButton(),
         const SizedBox(height: 10),
         if (Platform.isIOS) _buildAppleLoginButton(),
@@ -144,7 +147,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         color: Colors.black,
         shadowColor: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        elevation: 10,
+        elevation: 4,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
@@ -205,10 +208,10 @@ class _OnboardingViewState extends State<OnboardingView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Material(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 255, 255, 255),
         shadowColor: Colors.black,
         borderRadius: BorderRadius.circular(16),
-        elevation: 10,
+        elevation: 4,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
@@ -219,7 +222,14 @@ class _OnboardingViewState extends State<OnboardingView> {
             if (user != null) {
               await UserService().initializeUser(user.uid);
               Player? player = UserService().getUser();
-              if (player?.name.isEmpty ?? true) {
+              if (player == null) {
+                setState(() {
+                  _isLoading = false;
+                });
+                return;
+              }
+
+              if (player.name.isEmpty) {
                 print('프로필 설정 필요');
                 Navigator.pushReplacement(
                   context,
@@ -254,6 +264,70 @@ class _OnboardingViewState extends State<OnboardingView> {
                   'Google로 시작하기',
                   style: TextStyle(
                     color: Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuestButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Material(
+        color: const Color.fromARGB(255, 247, 247, 247),
+        shadowColor: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+        elevation: 2,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () async {
+            setState(() {
+              _isLoading = true;
+            });
+
+            await AuthService.signInWithGuestMode();
+            Player? player = UserService().getUser();
+            if (player == null) {
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
+            if (player.name.isEmpty) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          GuestProfileSettingView(callFromWhere: 'onboarding'),
+                ),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeView()),
+              );
+            }
+            _isLoading = false;
+          },
+          child: Container(
+            height: 56,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.person_outline, size: 28, color: Colors.grey[700]),
+                const SizedBox(width: 14),
+                Text(
+                  '게스트로 시작하기',
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 0, 0, 0),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),

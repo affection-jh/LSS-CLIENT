@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esc/data/player.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   // 싱글톤 패턴
@@ -13,23 +14,42 @@ class UserService {
   String? _userId;
   String _name = '';
   String _profileImageUrl = '';
+  bool _isGuestmode = false;
 
   // getter들
   String? get userId => _userId;
   String get name => _name;
   String? get profileImageUrl => _profileImageUrl;
+  bool get isGuestmode => _isGuestmode;
+
+  void setGuestPlayer(String userId, String? name) {
+    _userId = userId;
+    _name = name ?? "";
+    _isGuestmode = true;
+
+    print(
+      "게스트 플레이어 설정 - userId: $_userId, name: $_name, isGuest: $_isGuestmode",
+    );
+  }
 
   // static getter로 기존 코드와 호환성 유지
   Future<bool> initializeUser(String id) async {
     try {
+      // 기존 데이터 정리 (게스트 모드에서 로그인으로 전환 시)
+      cleanUserData();
+
       await FirebaseFirestore.instance.collection('users').doc(id).get().then((
         value,
       ) {
         _userId = value.data()?['userId'] ?? '';
         _name = value.data()?['name'] ?? '';
         _profileImageUrl = value.data()?['profileImageUrl'] ?? '';
+        _isGuestmode = false; // 로그인 사용자는 게스트 모드 아님
       });
 
+      print(
+        "로그인 사용자 초기화 - userId: $_userId, name: $_name, isGuest: $_isGuestmode",
+      );
       return _userId != null;
     } catch (e) {
       return false;
@@ -76,6 +96,26 @@ class UserService {
     } catch (e) {
       print('프로필 이미지 업데이트 실패: $e');
       return false;
+    }
+  }
+
+  void cleanUserData() {
+    _userId = null;
+    _name = "";
+    _profileImageUrl = "";
+    _isGuestmode = false;
+    print("사용자 데이터 정리 완료");
+  }
+
+  // 게스트 데이터만 정리 (SharedPreferences 포함)
+  Future<void> cleanGuestData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove("guest_name");
+      await prefs.remove("guest_id");
+      print("게스트 데이터 정리 완료");
+    } catch (e) {
+      print("게스트 데이터 정리 실패: $e");
     }
   }
 

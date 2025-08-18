@@ -47,17 +47,12 @@ class _ProfileSettingViewState extends State<ProfileSettingView> {
     // UserService에서 닉네임과 프로필 이미지 URL 받아오기
     final user = UserService().getUser();
     if (user != null) {
-      _nameController.text = user.name ?? '';
+      _nameController.text = user.name;
       _profileImageUrl = user.profileImageUrl;
-      _originalNickname = user.name ?? '';
+      _originalNickname = user.name;
       _originalProfileImageUrl = user.profileImageUrl;
     }
     _nameController.addListener(_onInputChanged);
-
-    // 자동 포커스 기능 제거
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   _nameFocusNode.requestFocus();
-    // });
   }
 
   void _onInputChanged() {

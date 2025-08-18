@@ -4,6 +4,7 @@ import 'package:esc/screens/onboarding_view.dart';
 import 'package:esc/screens/setting_view.dart';
 import 'package:esc/service/manage_service.dart';
 import 'package:esc/service/user_service.dart';
+import 'package:esc/utill/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 //158.179.174.166
@@ -146,7 +147,19 @@ class _HomeViewState extends State<HomeView> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
+          onTap: () async {
+            if (UserService().isGuestmode) {
+              bool? goToOnbording = await AppUtil.ShowWillLoginDiaglog(context);
+              if (goToOnbording == true) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => OnboardingView()),
+                  (route) => false,
+                );
+              }
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => CategorySelectionView()),

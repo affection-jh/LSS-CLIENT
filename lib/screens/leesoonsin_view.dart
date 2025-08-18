@@ -4,6 +4,7 @@ import 'package:esc/utill/appBar.dart';
 import 'package:esc/utill/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class LeeSoonSinView extends StatefulWidget {
   const LeeSoonSinView({super.key});
@@ -24,141 +25,147 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
     final screenHeight = MediaQuery.of(context).size.height;
     final isTablet = screenWidth > 600;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: buildAppBar(
-        context,
-        isPresident,
-        category: gameManager.currentSession!.category,
-      ),
-      body: Consumer<GameManager>(
-        builder: (context, gameManager, child) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isTablet ? 700 : double.infinity,
-                maxHeight: isTablet ? screenHeight : double.infinity,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: isTablet ? 20 : 0,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "${gameManager.currentSession!.currentPlayer!.name} 장군님이 오셨어요!",
-                            style: TextStyle(
-                              fontSize: isTablet ? 28 : 24,
-                              fontWeight: FontWeight.bold,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Column(
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0, end: 1),
-                        duration: Duration(milliseconds: 800),
-                        builder: (context, value, child) {
-                          return Opacity(
-                            opacity: value,
-                            child: _buildLeeImage(
-                              gameManager
-                                  .currentSession!
-                                  .currentPlayer!
-                                  .profileImageUrl,
-                            ),
-                          );
-                        },
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: buildAppBar(
+          context,
+          isPresident,
+          category: gameManager.currentSession!.category,
+        ),
+        body: Consumer<GameManager>(
+          builder: (context, gameManager, child) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isTablet ? 700 : double.infinity,
+                  maxHeight: isTablet ? screenHeight : double.infinity,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: isTablet ? 20 : 0,
                       ),
-
-                      if (gameManager.currentSession!.isPresident)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 24,
-                            right: 24,
-                            bottom: 10,
-                            top: 1,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${gameManager.currentSession!.currentPlayer!.name} 장군님이 오셨어요!",
+                              style: TextStyle(
+                                fontSize: isTablet ? 28 : 24,
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              maxLines: 1,
+                            ),
                           ),
-                          child: Material(
-                            color: ColorPalette.secondaryColor,
-                            borderRadius: BorderRadius.circular(15),
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  isLoading = true;
-                                });
-                                gameManager.continueLeeSoonSin();
-                                Future.delayed(Duration(seconds: 5), () {
-                                  if (mounted) {
-                                    AppUtil.showErrorSnackbar(
-                                      context,
-                                      message: "네트워크 연결을 확인해주세요.",
-                                    );
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                  }
-                                });
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                child: Text(
-                                  '계속하기',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                        ],
+                      ),
+                    ),
+
+                    Column(
+                      children: [
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: Duration(milliseconds: 800),
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: _buildLeeImage(
+                                gameManager
+                                    .currentSession!
+                                    .currentPlayer!
+                                    .profileImageUrl,
+                              ),
+                            );
+                          },
+                        ),
+
+                        if (gameManager.currentSession!.isPresident)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 24,
+                              right: 24,
+                              bottom: 10,
+                              top: 1,
+                            ),
+                            child: Material(
+                              color: ColorPalette.secondaryColor,
+                              borderRadius: BorderRadius.circular(15),
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+                                  gameManager.continueLeeSoonSin();
+                                  Future.delayed(Duration(seconds: 5), () {
+                                    if (mounted) {
+                                      AppUtil.showErrorSnackbar(
+                                        context,
+                                        message: "네트워크 연결을 확인해주세요.",
+                                      );
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    '계속하기',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-                      if (!gameManager.currentSession!.isPresident)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 24,
-                            right: 24,
-                            bottom: 10,
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(10),
+                        if (!gameManager.currentSession!.isPresident)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 24,
+                              right: 24,
+                              bottom: 10,
+                              top: 1,
                             ),
-                            child: Text(
-                              '방장이 계속하기를 누를 때까지 기다려주세요.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '방장이 계속하기를 누를 때까지 기다려주세요.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
                           ),
-                        ),
-                      SizedBox(height: 20),
-                    ],
-                  ),
-                ],
+                        SizedBox(height: 20),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -192,34 +199,54 @@ class _LeeSoonSinViewState extends State<LeeSoonSinView> {
                   height: coinSize,
                   child: Center(
                     child:
-                        imageUrl != null
-                            ? Image.network(
-                              imageUrl,
+                        imageUrl != null && imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                              imageUrl: imageUrl,
                               width: coinSize,
                               height: coinSize,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: coinSize,
-                                  height: coinSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
+                              placeholder:
+                                  (context, url) => Container(
+                                    width: coinSize,
+                                    height: coinSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: coinSize * 0.7,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.person,
-                                      size: coinSize * 0.7,
-                                      color: Colors.white,
+                              errorWidget:
+                                  (context, url, error) => Container(
+                                    width: coinSize,
+                                    height: coinSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: coinSize * 0.7,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
                             )
                             : Container(
                               width: coinSize,

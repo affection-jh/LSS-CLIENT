@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esc/service/user_service.dart';
 import 'package:esc/utill/appBar.dart';
 import 'package:esc/utill/coin_spin.dart' show CoinSpinWidget;
@@ -20,7 +21,7 @@ class _TestTrackState extends State<TestTrack> {
 
   late DateTime _endTime;
   late Timer _timer;
-  int _remainingSeconds = 120; // 2분 타이머 예시
+  int _remainingSeconds = 60; // 1분 타이머 예시
 
   @override
   void initState() {
@@ -338,69 +339,55 @@ class _TestLeesoonSinState extends State<TestLeesoonSin> {
                   child: Center(
                     child:
                         imageUrl != null
-                            ? Image.network(
-                              imageUrl,
+                            ? CachedNetworkImage(
+                              imageUrl: imageUrl,
                               width: coinSize,
                               height: coinSize,
                               fit: BoxFit.cover,
-                              loadingBuilder: (
-                                context,
-                                child,
-                                loadingProgress,
-                              ) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  width: coinSize,
-                                  height: coinSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
+                              placeholder:
+                                  (context, url) => Container(
+                                    width: coinSize,
+                                    height: coinSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
                                     ),
-                                  ),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: coinSize,
-                                  height: coinSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      216,
-                                      216,
-                                      216,
+                              errorWidget:
+                                  (context, url, error) => Container(
+                                    width: coinSize,
+                                    height: coinSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        216,
+                                        216,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: coinSize * 0.7,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.person,
-                                      size: coinSize * 0.7,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                );
-                              },
                             )
                             : Container(
                               width: coinSize,

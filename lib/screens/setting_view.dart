@@ -1,3 +1,4 @@
+import 'package:esc/screens/guest_profile_setting_view.dart';
 import 'package:esc/screens/onboarding_view.dart';
 import 'package:esc/screens/profile_setting_view.dart';
 import 'package:esc/service/auth_service.dart';
@@ -71,14 +72,26 @@ class _SettingViewState extends State<SettingView> {
                   // 프로필 이미지
                   GestureDetector(
                     onTap: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  ProfileSettingView(callFromWhere: 'setting'),
-                        ),
-                      );
+                      final result =
+                          UserService().isGuestmode
+                              ? await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => GuestProfileSettingView(
+                                        callFromWhere: 'setting',
+                                      ),
+                                ),
+                              )
+                              : await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => ProfileSettingView(
+                                        callFromWhere: 'setting',
+                                      ),
+                                ),
+                              );
 
                       // 이미지가 변경되었으면 로딩 띄우고 새로고침
                       if (result == true) {
@@ -221,15 +234,26 @@ class _SettingViewState extends State<SettingView> {
                       SizedBox(height: 16),
                       GestureDetector(
                         onTap: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => ProfileSettingView(
-                                    callFromWhere: 'setting',
-                                  ),
-                            ),
-                          );
+                          final result =
+                              UserService().isGuestmode
+                                  ? await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => GuestProfileSettingView(
+                                            callFromWhere: 'setting',
+                                          ),
+                                    ),
+                                  )
+                                  : await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => ProfileSettingView(
+                                            callFromWhere: 'setting',
+                                          ),
+                                    ),
+                                  );
 
                           // 이미지가 변경되었으면 닉네임도 새로고침
                           if (result == true) {
@@ -354,27 +378,47 @@ class _SettingViewState extends State<SettingView> {
               ),
               child: Column(
                 children: [
-                  _buildSettingItem(
-                    icon: Icons.logout,
-                    title: '로그아웃',
-                    subtitle: '계정에서 로그아웃합니다',
-                    onTap: () {
-                      _showLogoutDialog('로그아웃');
-                    },
-                    textColor: Colors.black87,
-                    iconColor: const Color.fromARGB(255, 255, 150, 150),
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.person_remove_outlined,
-                    title: '탈퇴하기',
-                    subtitle: '계정을 탈퇴합니다',
-                    onTap: () {
-                      _showLogoutDialog('탈퇴');
-                    },
-                    textColor: Colors.red,
-                    iconColor: const Color.fromARGB(255, 255, 150, 150),
-                  ),
+                  if (UserService().isGuestmode)
+                    _buildSettingItem(
+                      icon: Icons.login,
+                      title: '로그인하러가기',
+                      subtitle: '간편 로그인하고 모든 기능을 이용해보세요!',
+                      onTap: () {
+                        UserService().cleanUserData();
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OnboardingView(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      textColor: Colors.black,
+                      iconColor: const Color.fromARGB(255, 255, 150, 150),
+                    )
+                  else ...[
+                    _buildSettingItem(
+                      icon: Icons.logout,
+                      title: '로그아웃',
+                      subtitle: '계정에서 로그아웃합니다',
+                      onTap: () {
+                        _showLogoutDialog('로그아웃');
+                      },
+                      textColor: Colors.black87,
+                      iconColor: const Color.fromARGB(255, 255, 150, 150),
+                    ),
+                    _buildDivider(),
+                    _buildSettingItem(
+                      icon: Icons.person_remove_outlined,
+                      title: '탈퇴하기',
+                      subtitle: '계정을 탈퇴합니다',
+                      onTap: () {
+                        _showLogoutDialog('탈퇴');
+                      },
+                      textColor: Colors.red,
+                      iconColor: const Color.fromARGB(255, 255, 150, 150),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -383,7 +427,7 @@ class _SettingViewState extends State<SettingView> {
 
             // 앱 버전 정보
             Text(
-              '버전 1.0.0',
+              '버전 1.0.2',
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             SizedBox(height: 16),
@@ -688,6 +732,10 @@ class _SettingViewState extends State<SettingView> {
   }
 
   void _showLogoutDialog(String title) {
+    if (UserService().isGuestmode) {
+      AppUtil.showErrorSnackbar(context, message: "현재 게스트모드에 있어요!");
+      return;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -743,6 +791,7 @@ class _SettingViewState extends State<SettingView> {
     try {
       await AuthService.signOut();
       if (mounted) {
+        UserService().cleanUserData();
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => OnboardingView()),
@@ -873,6 +922,7 @@ class _SettingViewState extends State<SettingView> {
       if (success) {
         // 탈퇴 성공 - 온보딩으로 이동
         if (mounted) {
+          UserService().cleanUserData();
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => OnboardingView()),

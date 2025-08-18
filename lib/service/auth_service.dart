@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esc/data/player.dart';
+import 'package:esc/service/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
 
 class AuthService {
   static Future<User?> signInWithGoogle() async {
@@ -96,6 +99,22 @@ class AuthService {
     }
   }
 
+  static Future<void> signInWithGuestMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? name = await prefs.getString("guest_name");
+    String? userId = await prefs.getString("guest_id");
+
+    if (userId == null) {
+      userId = Uuid().v6();
+      await prefs.setString("guest_id", userId);
+    }
+
+    // name이 null이면 빈 문자열로 설정 (기존 로직 유지)
+    UserService().setGuestPlayer(userId, name ?? "");
+
+    print("게스트 모드 로드 - userId: $userId, name: $name");
+  }
+
   static Future<String?> isSignedIn() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -125,6 +144,8 @@ class AuthService {
 
   static Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
+    // UserService 데이터도 정리
+    UserService().cleanUserData();
     print("로그아웃 성공");
   }
 
